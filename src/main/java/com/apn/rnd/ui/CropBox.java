@@ -10,6 +10,8 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 
 /**
  *
@@ -130,34 +132,75 @@ public class CropBox extends AnchorPane {
         this.getChildren().addAll(topLeft, top, topRight, left, right, bottomLeft, bottom, bottomRight);
     }
 
+    private double headerHeight = 30;
     private void createHeader() {
         // draw header rectangle
-
+        Rectangle header = new Rectangle(0, 0, CropBox.this.getWidth() - 2 * margin, headerHeight);
+        header.setFill(Color.AZURE);
+        //header.setOpacity(0.5);        
+        
+        
+        this.widthProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                header.setWidth(CropBox.this.getWidth() - 2 * margin);
+            }
+        });
+        
         // draw box title
+        Text title = new Text(margin, margin, "Test Title");
+        title.setFont(new Font("Tahoma", 14));
+        this.getChildren().addAll(header, title);
+        
+        title.toBack();
+        header.toBack();
     }
 
     private void createContent() {
+        Rectangle content = new Rectangle(margin, headerHeight+handleSize, CropBox.this.getWidth() - 2 * margin, CropBox.this.getHeight() - 2 * margin - headerHeight);
+        content.setFill(Color.BLUE);
+        //header.setOpacity(0.5);        
+        
+        
+        this.widthProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                content.setWidth(CropBox.this.getWidth() - 2 * margin);
+            }
+        });
+        
+         this.heightProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                content.setHeight(CropBox.this.getHeight() - 2 * margin - headerHeight);
+            }
+        });
+         
+        content.setOnMouseDragged(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                System.out.println("Mouse dragged ... " + " screenX: " + event.getScreenX() + " sceneX: " + event.getSceneX() + " X: " + event.getX());
 
+//                if (oldX == 0 && oldY == 0) return;
+                CropBox.this.setLayoutX(getLayoutX() + (event.getSceneX() - oldX));
+                CropBox.this.setLayoutY(getLayoutY() + (event.getSceneY() - oldY));
+
+                oldX = event.getSceneX();
+                oldY = event.getSceneY();
+            }
+        });
+
+         this.getChildren().addAll(content);
+         content.toBack();
     }
 
     private void createBox() {
         createHandles();
+        createHeader();
+        createContent();
 
         this.setOpacity(0.5);
 
-//        this.setOnMouseDragged(new EventHandler<MouseEvent>() {
-//            @Override
-//            public void handle(MouseEvent event) {
-//                System.out.println("Mouse dragged ... " + " screenX: " + event.getScreenX() + " sceneX: " + event.getSceneX() + " X: " + event.getX());
-//
-////                if (oldX == 0 && oldY == 0) return;
-//                CropBox.this.setLayoutX(getLayoutX() + (event.getSceneX() - oldX));
-//                CropBox.this.setLayoutY(getLayoutY() + (event.getSceneY() - oldY));
-//
-//                oldX = event.getSceneX();
-//                oldY = event.getSceneY();
-//            }
-//        });
         this.setOnMousePressed(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
