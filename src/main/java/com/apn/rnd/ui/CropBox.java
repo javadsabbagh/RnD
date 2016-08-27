@@ -10,6 +10,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import net.coobird.thumbnailator.util.exif.Orientation;
 
 /**
  *
@@ -122,39 +123,47 @@ public class CropBox extends AnchorPane {
         top.setOnMouseDragged(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                System.out.println(""+getScaleY());
+                System.out.println("Top scale y: " + top.getScaleY());
+                System.out.println("" + getScaleY());
 //                if (getScaleY() < 0.3) return;
                 double xx = event.getSceneX() - oldX;
                 double yy = event.getSceneY() - oldY;
                 System.out.println("yy:" + yy);
 
-                System.out.println("Top mouse dragged ... " + yy / 10);
+                System.out.println("Top mouse dragged ... " + yy);
+
+                CropBox.this.setPrefHeight(CropBox.this.getHeight() - yy);
+                CropBox.this.setLayoutY(getLayoutY() + (event.getSceneY() - oldY));
+               
 
 //                CropBox.this.setScaleX(CropBox.this.getScaleX() + xx/10);
-                CropBox.this.setScaleY(CropBox.this.getScaleY() - yy / 10);
+//                CropBox.this.setScaleY(CropBox.this.getScaleY() - yy / 10);
+//                top.setWidth(10.0);
+//                top.setHeight(10.0);
+//                top.setScaleX(1.0);
+//                top.setScaleY(1.0);                               
+                System.out.println("Top scale y" + top.getScaleY());
                 oldY = event.getSceneY();
             }
         });
 
-        this.setStyle("-fx-padding: 10;"
-                + "-fx-border-style: solid inside;"
-                + "-fx-border-width: 2;"
-                + "-fx-border-insets: 5;"
-                + "-fx-border-radius: 5;"
-                + "-fx-border-color: blue;");
-
+//        this.setStyle("-fx-padding: 10;"
+//                + "-fx-border-style: solid inside;"
+//                + "-fx-border-width: 2;"
+//                + "-fx-border-insets: 5;"
+//                + "-fx-border-radius: 5;"
+//                + "-fx-border-color: blue;");
         this.setOpacity(0.5);
 
         this.setOnMouseDragged(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
                 System.out.println("Mouse dragged ... " + " screenX: " + event.getScreenX() + " sceneX: " + event.getSceneX() + " X: " + event.getX());
-                
+
 //                if (oldX == 0 && oldY == 0) return;
-                
                 CropBox.this.setLayoutX(getLayoutX() + (event.getSceneX() - oldX));
                 CropBox.this.setLayoutY(getLayoutY() + (event.getSceneY() - oldY));
-                
+
                 oldX = event.getSceneX();
                 oldY = event.getSceneY();
             }
@@ -167,7 +176,6 @@ public class CropBox extends AnchorPane {
 //                oldY = event.getSceneY();
 //            }
 //        });
-
         this.setOnMousePressed(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
@@ -229,7 +237,7 @@ public class CropBox extends AnchorPane {
     /**
      * ************************************************
      *
-     *                  State of a CropBox
+     * State of a CropBox
      *
      * ************************************************
      */
