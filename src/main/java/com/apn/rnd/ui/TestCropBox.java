@@ -71,7 +71,7 @@ public class TestCropBox extends Application {
         imageView.setLayoutY(0);
         imageView.setFitWidth(650);
         imageView.setFitHeight(650);
-
+                
         root = new Pane();
         root.setPrefWidth(650);
         root.setPrefHeight(650);

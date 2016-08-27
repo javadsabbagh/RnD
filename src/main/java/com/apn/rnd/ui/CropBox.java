@@ -3,7 +3,10 @@ package com.apn.rnd.ui;
 import java.awt.Rectangle;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.EventHandler;
 import javafx.scene.Cursor;
+import javafx.scene.input.MouseDragEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -50,6 +53,11 @@ public class CropBox extends AnchorPane {
         topLeft.setCursor(Cursor.NW_RESIZE);
         top.setCursor(Cursor.N_RESIZE);
         topRight.setCursor(Cursor.NE_RESIZE);
+        left.setCursor(Cursor.E_RESIZE);
+        right.setCursor(Cursor.W_RESIZE);
+        bottomLeft.setCursor(Cursor.SW_RESIZE);
+        bottom.setCursor(Cursor.S_RESIZE);
+        bottomRight.setCursor(Cursor.SE_RESIZE);
 
         double degree = 100.0;
         double radian = Math.toRadians(degree);
@@ -98,6 +106,36 @@ public class CropBox extends AnchorPane {
             }
         });
 
+        this.heightProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                System.out.println("old value:" + oldValue.intValue() + " new value " + newValue.intValue());
+
+                // FIXME you need to consider margins, and shape size
+                AnchorPane.setLeftAnchor(top, (CropBox.this.widthProperty().doubleValue() - 2 * margin - 2 * width) / 2.0);
+                AnchorPane.setTopAnchor(left, CropBox.this.getHeight() / 2);
+                AnchorPane.setTopAnchor(right, CropBox.this.getHeight() / 2);
+                AnchorPane.setLeftAnchor(bottom, CropBox.this.widthProperty().doubleValue() / 2.0);
+            }
+        });
+
+        top.setOnMouseDragged(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                System.out.println(""+getScaleY());
+//                if (getScaleY() < 0.3) return;
+                double xx = event.getSceneX() - oldX;
+                double yy = event.getSceneY() - oldY;
+                System.out.println("yy:" + yy);
+
+                System.out.println("Top mouse dragged ... " + yy / 10);
+
+//                CropBox.this.setScaleX(CropBox.this.getScaleX() + xx/10);
+                CropBox.this.setScaleY(CropBox.this.getScaleY() - yy / 10);
+                oldY = event.getSceneY();
+            }
+        });
+
         this.setStyle("-fx-padding: 10;"
                 + "-fx-border-style: solid inside;"
                 + "-fx-border-width: 2;"
@@ -106,7 +144,55 @@ public class CropBox extends AnchorPane {
                 + "-fx-border-color: blue;");
 
         this.setOpacity(0.5);
+
+        this.setOnMouseDragged(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                System.out.println("Mouse dragged ... " + " screenX: " + event.getScreenX() + " sceneX: " + event.getSceneX() + " X: " + event.getX());
+                
+//                if (oldX == 0 && oldY == 0) return;
+                
+                CropBox.this.setLayoutX(getLayoutX() + (event.getSceneX() - oldX));
+                CropBox.this.setLayoutY(getLayoutY() + (event.getSceneY() - oldY));
+                
+                oldX = event.getSceneX();
+                oldY = event.getSceneY();
+            }
+        });
+
+//        this.setOnMouseMoved(new EventHandler<MouseEvent>() {
+//            @Override
+//            public void handle(MouseEvent event) {
+//                oldX = event.getSceneX();
+//                oldY = event.getSceneY();
+//            }
+//        });
+
+        this.setOnMousePressed(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                System.out.println("on mouse pressed");
+                oldX = event.getSceneX();
+                oldY = event.getSceneY();
+            }
+        });
+
+//        this.setOnMouseDragged(new EventHandler<MouseEvent>() {
+//            @Override
+//            public void handle(MouseEvent event) {                
+//                System.out.println("Mouse drag beginned ... ");
+//            }
+//        });
+//        this.setOnMouseDragReleased(new EventHandler<MouseDragEvent>() {
+//            @Override
+//            public void handle(MouseDragEvent event) {
+//                System.out.println("Mouse drag released ...");
+//            }
+//        });
     }
+
+    private double oldX;
+    private double oldY;
 
     public State getState() {
         return state;
