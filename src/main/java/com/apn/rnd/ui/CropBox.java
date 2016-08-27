@@ -1,16 +1,15 @@
 package com.apn.rnd.ui;
 
-import java.awt.Rectangle;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Cursor;
-import javafx.scene.input.MouseDragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
-import net.coobird.thumbnailator.util.exif.Orientation;
+import javafx.scene.shape.Rectangle;
 
 /**
  *
@@ -18,8 +17,10 @@ import net.coobird.thumbnailator.util.exif.Orientation;
  */
 public class CropBox extends AnchorPane {
 
+    private static final int handleSize = 10;
+    private Paint handleColor = Color.RED;
     private State state;
-    private double margin;
+    private double margin = 20.0;
     private double angle;
     private String title;
 
@@ -27,29 +28,24 @@ public class CropBox extends AnchorPane {
         createBox();
     }
 
-    public CropBox(Rectangle rect, String title) {
+    public CropBox(Rectangle2D rect, String title) {
     }
 
-    public CropBox(Rectangle rect, double angle, String title) {
+    public CropBox(Rectangle2D rect, double angle, String title) {
     }
 
     public CropBox(double x, double y, double width, double height, double angle, String title) {
     }
 
-    private void createBox() {
-        Paint fillColor = Color.LIGHTBLUE;
-        double width = 10;
-        double height = 10;
-        double margin = 10.0;
-
-        javafx.scene.shape.Rectangle topLeft = new javafx.scene.shape.Rectangle(10, 10, width, height);
-        javafx.scene.shape.Rectangle top = new javafx.scene.shape.Rectangle(10, 10, width, height);
-        javafx.scene.shape.Rectangle topRight = new javafx.scene.shape.Rectangle(10, 10, width, height);
-        javafx.scene.shape.Rectangle left = new javafx.scene.shape.Rectangle(10, 10, width, height);
-        javafx.scene.shape.Rectangle right = new javafx.scene.shape.Rectangle(10, 10, width, height);
-        javafx.scene.shape.Rectangle bottomLeft = new javafx.scene.shape.Rectangle(10, 10, width, height);
-        javafx.scene.shape.Rectangle bottom = new javafx.scene.shape.Rectangle(10, 10, width, height);
-        javafx.scene.shape.Rectangle bottomRight = new javafx.scene.shape.Rectangle(10, 10, width, height);
+    private void createHandles() {
+        Rectangle topLeft = new Rectangle(10, 10, handleSize, handleSize);
+        Rectangle top = new Rectangle(10, 10, handleSize, handleSize);
+        Rectangle topRight = new Rectangle(10, 10, handleSize, handleSize);
+        Rectangle left = new Rectangle(10, 10, handleSize, handleSize);
+        Rectangle right = new Rectangle(10, 10, handleSize, handleSize);
+        Rectangle bottomLeft = new Rectangle(10, 10, handleSize, handleSize);
+        Rectangle bottom = new Rectangle(10, 10, handleSize, handleSize);
+        Rectangle bottomRight = new Rectangle(10, 10, handleSize, handleSize);
 
         topLeft.setCursor(Cursor.NW_RESIZE);
         top.setCursor(Cursor.N_RESIZE);
@@ -60,21 +56,14 @@ public class CropBox extends AnchorPane {
         bottom.setCursor(Cursor.S_RESIZE);
         bottomRight.setCursor(Cursor.SE_RESIZE);
 
-        double degree = 100.0;
-        double radian = Math.toRadians(degree);
-        topLeft.setRotate(radian);
-
-        topLeft.setFill(fillColor);
-        top.setFill(fillColor);
-        topRight.setFill(fillColor);
-        left.setFill(fillColor);
-        right.setFill(fillColor);
-        bottomLeft.setFill(fillColor);
-        bottom.setFill(fillColor);
-        bottomRight.setFill(fillColor);
-
-//        AnchorPane root = new AnchorPane();
-        this.getChildren().addAll(topLeft, top, topRight, left, right, bottomLeft, bottom, bottomRight);
+        topLeft.setFill(handleColor);
+        top.setFill(handleColor);
+        topRight.setFill(handleColor);
+        left.setFill(handleColor);
+        right.setFill(handleColor);
+        bottomLeft.setFill(handleColor);
+        bottom.setFill(handleColor);
+        bottomRight.setFill(handleColor);
 
         AnchorPane.setTopAnchor(topLeft, margin);
         AnchorPane.setTopAnchor(top, margin);
@@ -92,15 +81,13 @@ public class CropBox extends AnchorPane {
         AnchorPane.setRightAnchor(right, margin);
         AnchorPane.setRightAnchor(bottomRight, margin);
 
-        this.setOpacity(10);
-
         this.widthProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 System.out.println("old value:" + oldValue.intValue() + " new value " + newValue.intValue());
 
                 // FIXME you need to consider margins, and shape size
-                AnchorPane.setLeftAnchor(top, (CropBox.this.widthProperty().doubleValue() - 2 * margin - 2 * width) / 2.0);
+                AnchorPane.setLeftAnchor(top, (CropBox.this.widthProperty().doubleValue() - 2 * margin - 2 * handleSize) / 2.0);
                 AnchorPane.setTopAnchor(left, CropBox.this.getHeight() / 2);
                 AnchorPane.setTopAnchor(right, CropBox.this.getHeight() / 2);
                 AnchorPane.setLeftAnchor(bottom, CropBox.this.widthProperty().doubleValue() / 2.0);
@@ -113,65 +100,60 @@ public class CropBox extends AnchorPane {
                 System.out.println("old value:" + oldValue.intValue() + " new value " + newValue.intValue());
 
                 // FIXME you need to consider margins, and shape size
-                AnchorPane.setLeftAnchor(top, (CropBox.this.widthProperty().doubleValue() - 2 * margin - 2 * width) / 2.0);
+                AnchorPane.setLeftAnchor(top, (CropBox.this.widthProperty().doubleValue() - 2 * margin - 2 * handleSize) / 2.0);
                 AnchorPane.setTopAnchor(left, CropBox.this.getHeight() / 2);
                 AnchorPane.setTopAnchor(right, CropBox.this.getHeight() / 2);
                 AnchorPane.setLeftAnchor(bottom, CropBox.this.widthProperty().doubleValue() / 2.0);
             }
         });
-
         top.setOnMouseDragged(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                System.out.println("Top scale y: " + top.getScaleY());
-                System.out.println("" + getScaleY());
-//                if (getScaleY() < 0.3) return;
-                double xx = event.getSceneX() - oldX;
+                // FIXME checking size an policies must be done on its separate methods
+                //  if (getScaleY() < 0.3) return;  
                 double yy = event.getSceneY() - oldY;
-                System.out.println("yy:" + yy);
 
-                System.out.println("Top mouse dragged ... " + yy);
+                double oldH = CropBox.this.getPrefHeight();
+                CropBox.this.setPrefHeight(CropBox.this.getPrefHeight() - yy);
+                /**
+                 * Note: code commented below has a bug! Don't use displace fix
+                 * in this way.
+                 */
+                // CropBox.this.setLayoutY(event.getSceneY() - margin - handleSize / 2); 
+                CropBox.this.setLayoutY(CropBox.this.getLayoutY() - (CropBox.this.getPrefHeight() - oldH));
 
-                CropBox.this.setPrefHeight(CropBox.this.getHeight() - yy);
-                CropBox.this.setLayoutY(getLayoutY() + (event.getSceneY() - oldY));
-               
-
-//                CropBox.this.setScaleX(CropBox.this.getScaleX() + xx/10);
-//                CropBox.this.setScaleY(CropBox.this.getScaleY() - yy / 10);
-//                top.setWidth(10.0);
-//                top.setHeight(10.0);
-//                top.setScaleX(1.0);
-//                top.setScaleY(1.0);                               
-                System.out.println("Top scale y" + top.getScaleY());
                 oldY = event.getSceneY();
             }
         });
 
-//        this.setStyle("-fx-padding: 10;"
-//                + "-fx-border-style: solid inside;"
-//                + "-fx-border-width: 2;"
-//                + "-fx-border-insets: 5;"
-//                + "-fx-border-radius: 5;"
-//                + "-fx-border-color: blue;");
+        // Add all components to the root node (CropBox)
+        this.getChildren().addAll(topLeft, top, topRight, left, right, bottomLeft, bottom, bottomRight);
+    }
+
+    private void createHeader() {
+        // draw header rectangle
+
+        // draw box title
+    }
+
+    private void createContent() {
+
+    }
+
+    private void createBox() {
+        createHandles();
+
         this.setOpacity(0.5);
 
-        this.setOnMouseDragged(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                System.out.println("Mouse dragged ... " + " screenX: " + event.getScreenX() + " sceneX: " + event.getSceneX() + " X: " + event.getX());
-
-//                if (oldX == 0 && oldY == 0) return;
-                CropBox.this.setLayoutX(getLayoutX() + (event.getSceneX() - oldX));
-                CropBox.this.setLayoutY(getLayoutY() + (event.getSceneY() - oldY));
-
-                oldX = event.getSceneX();
-                oldY = event.getSceneY();
-            }
-        });
-
-//        this.setOnMouseMoved(new EventHandler<MouseEvent>() {
+//        this.setOnMouseDragged(new EventHandler<MouseEvent>() {
 //            @Override
 //            public void handle(MouseEvent event) {
+//                System.out.println("Mouse dragged ... " + " screenX: " + event.getScreenX() + " sceneX: " + event.getSceneX() + " X: " + event.getX());
+//
+////                if (oldX == 0 && oldY == 0) return;
+//                CropBox.this.setLayoutX(getLayoutX() + (event.getSceneX() - oldX));
+//                CropBox.this.setLayoutY(getLayoutY() + (event.getSceneY() - oldY));
+//
 //                oldX = event.getSceneX();
 //                oldY = event.getSceneY();
 //            }
@@ -184,19 +166,6 @@ public class CropBox extends AnchorPane {
                 oldY = event.getSceneY();
             }
         });
-
-//        this.setOnMouseDragged(new EventHandler<MouseEvent>() {
-//            @Override
-//            public void handle(MouseEvent event) {                
-//                System.out.println("Mouse drag beginned ... ");
-//            }
-//        });
-//        this.setOnMouseDragReleased(new EventHandler<MouseDragEvent>() {
-//            @Override
-//            public void handle(MouseDragEvent event) {
-//                System.out.println("Mouse drag released ...");
-//            }
-//        });
     }
 
     private double oldX;
