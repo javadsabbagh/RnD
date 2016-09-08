@@ -1,5 +1,6 @@
 package com.apn.rnd.ui;
 
+import java.util.Timer;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
@@ -46,6 +47,7 @@ public class CropBox extends Pane {
     private double headerHeight = 30;
     private Rectangle header;
     // Content
+    private Pane content2;
     private Rectangle content;
 
     public CropBox() {
@@ -280,16 +282,42 @@ public class CropBox extends Pane {
 
         // draw box title
         // title = new Text(margin, margin, "یک متن نسبتا lkjcdafتصر برای عنوان");
-        title = new Label("یک متن نسبتا lkjcdafتصر برای عنوان");
+        title = new Label("متن المتون");
         title.setFont(Font.font("Tahoma", FontWeight.BOLD, 13));
         //title.setFill(Color.BLACK);
         title.setOpacity(0.8);
 
-        title.setTextAlignment(TextAlignment.LEFT);
-        //title.setBoundsType(TextBoundsType.VISUAL);
+        /**
+         * this is how to calculate a text width in javafx
+         */
+        Text temp = new Text(title.getText());
+        temp.setFont(title.getFont());
+        double titleWidth = temp.getLayoutBounds().getWidth();
+        System.out.println("________________________________" + titleWidth);
+
+        title.setLayoutX(this.getWidth() / 2 - titleWidth / 2);
+
+        //title.setTextAlignment(TextAlignment.LEFT);
+        //title.setBoundsType(TextBoundsType.VISUAL);       
     }
 
     private void createContent() {
+        content2 = new Pane();
+        content2.setLayoutX(margin);
+        content2.setLayoutY(margin + headerHeight);
+        content2.setPrefSize(CropBox.this.getWidth() - 2 * margin, CropBox.this.getHeight() - 2 * margin - headerHeight);
+//        content2.setFill(Color.WHITE);
+//        Rectangle border = new Rectangle(content2.getWidth() - 2, content2.getHeight() - 2);
+//        border.setFill(Color.BLUE);
+//        content2.getChildren().addAll(border);
+
+        content2.setStyle(//"-fx-padding: 10;" +
+                 "-fx-border-style: solid inside;"
+                + "-fx-border-width: 2;"
+//                + "-fx-border-insets: 5;"
+//                + "-fx-border-radius: 5;"
+                + "-fx-border-color: blue;");
+
         content = new Rectangle(margin, margin + headerHeight, CropBox.this.getWidth() - 2 * margin, CropBox.this.getHeight() - 2 * margin - headerHeight);
         // content.setFill(Color.BLUE);
         //content.setOpacity(0.0); // fully translucent 
@@ -304,7 +332,19 @@ public class CropBox extends Pane {
             public void handle(MouseEvent event) {
                 System.out.println("Mouse dragged ... " + " screenX: " + event.getScreenX() + " sceneX: " + event.getSceneX() + " X: " + event.getX());
 
-//                if (oldX == 0 && oldY == 0) return;
+                CropBox.this.setLayoutX(getLayoutX() + (event.getSceneX() - oldX));
+                CropBox.this.setLayoutY(getLayoutY() + (event.getSceneY() - oldY));
+
+                oldX = event.getSceneX();
+                oldY = event.getSceneY();
+            }
+        });
+
+        content2.setOnMouseDragged(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                System.out.println("Mouse dragged ... " + " screenX: " + event.getScreenX() + " sceneX: " + event.getSceneX() + " X: " + event.getX());
+
                 CropBox.this.setLayoutX(getLayoutX() + (event.getSceneX() - oldX));
                 CropBox.this.setLayoutY(getLayoutY() + (event.getSceneY() - oldY));
 
@@ -320,7 +360,20 @@ public class CropBox extends Pane {
         createHeader();
         createContent();
 
-        this.getChildren().addAll(content, header, title, topLeft, top, topRight, left, right, bottomLeft, bottom, bottomRight);
+        this.getChildren().addAll(content2, header, title, topLeft, top, topRight, left, right, bottomLeft, bottom, bottomRight);
+
+//        this.visibleProperty().addListener(new ChangeListener<Boolean>() {
+//            @Override
+//            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+//                System.out.println("qweuiqwqwquiwewque");
+//                Text temp = new Text(title.getText());
+//                temp.setFont(title.getFont());
+//                double titleWidth = temp.getLayoutBounds().getWidth();
+//                System.out.println("________________________________" + titleWidth);
+//                title.setPrefWidth(titleWidth);
+//                title.setLayoutX(CropBox.this.getWidth() / 2 - titleWidth / 2);
+//            }
+//        });
 
         //this.setOpacity(0.5);  // set opacity specifically on each child
         this.setOnMousePressed(new EventHandler<MouseEvent>() {
@@ -329,6 +382,8 @@ public class CropBox extends Pane {
                 System.out.println("on mouse pressed");
                 oldX = event.getSceneX();
                 oldY = event.getSceneY();
+
+                CropBox.this.toFront();
             }
         });
 
@@ -337,8 +392,14 @@ public class CropBox extends Pane {
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 //System.out.println("pane old width:" + oldValue.intValue() + " , pane new value " + newValue.intValue());                
                 content.setWidth(CropBox.this.getWidth() - 2 * margin);
+                content2.setPrefWidth(CropBox.this.getWidth() - 2 * margin);
                 layoutHandles();
-                title.setLayoutX(CropBox.this.getWidth() / 2 - title.getWidth()/ 2);
+                //title.setLayoutX(CropBox.this.getWidth() / 2 - title.getWidth() / 2);
+                Text temp = new Text(title.getText());
+                temp.setFont(title.getFont());
+                double titleWidth = temp.getLayoutBounds().getWidth();
+                System.out.println("________________________________" + titleWidth);
+                title.setLayoutX(CropBox.this.getWidth() / 2 - titleWidth / 2);
             }
         });
 
@@ -351,8 +412,9 @@ public class CropBox extends Pane {
                  * positions depend on it.
                  */
                 content.setHeight(CropBox.this.getHeight() - 2 * margin - headerHeight);
+                content2.setPrefHeight(CropBox.this.getHeight() - 2 * margin - headerHeight);
                 layoutHandles();
-                title.setLayoutY(margin + headerHeight / 2 /*- title.getBaselineOffset()*/); // fixed position
+                title.setLayoutY(margin + headerHeight / 2 - title.getBaselineOffset() / 2); // fixed position
             }
         });
     }

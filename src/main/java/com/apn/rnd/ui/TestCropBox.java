@@ -36,12 +36,6 @@ public class TestCropBox extends Application {
     }
 
     private void createComponents() {
-//        Button btn = new Button();
-//        btn.setText("Say 'Hello World'");
-//        btn.setOnAction((ActionEvent event) -> {
-//            System.out.println("Hello World!");
-//        });
-
         CropBox box1 = new CropBox();
         box1.setLayoutX(270);
         box1.setLayoutY(40);
