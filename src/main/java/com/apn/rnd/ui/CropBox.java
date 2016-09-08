@@ -5,26 +5,48 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Cursor;
+import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
+import javafx.scene.text.TextBoundsType;
 
 /**
  *
  * @author Sabbagh
  */
-public class CropBox extends AnchorPane {
+public class CropBox extends Pane {
 
-    private static final int handleSize = 10;
-    private Paint handleColor = Color.RED;
     private State state;
-    private double margin = 20.0;
+    private double margin = 0.0;
     private double angle;
-    private String title;
+
+    // Handles
+    private static final int handleSize = 6;
+    private Paint handleColor = Color.RED;
+    private Rectangle topLeft;
+    private Rectangle top;
+    private Rectangle topRight;
+    private Rectangle left;
+    private Rectangle right;
+    private Rectangle bottomLeft;
+    private Rectangle bottom;
+    private Rectangle bottomRight;
+    // Header
+    private String titleStr;
+    //private Text title;
+    private Label title;
+    private double headerHeight = 30;
+    private Rectangle header;
+    // Content
+    private Rectangle content;
 
     public CropBox() {
         createBox();
@@ -40,15 +62,17 @@ public class CropBox extends AnchorPane {
     }
 
     private void createHandles() {
-        Rectangle topLeft = new Rectangle(10, 10, handleSize, handleSize);
-        Rectangle top = new Rectangle(10, 10, handleSize, handleSize);
-        Rectangle topRight = new Rectangle(10, 10, handleSize, handleSize);
-        Rectangle left = new Rectangle(10, 10, handleSize, handleSize);
-        Rectangle right = new Rectangle(10, 10, handleSize, handleSize);
-        Rectangle bottomLeft = new Rectangle(10, 10, handleSize, handleSize);
-        Rectangle bottom = new Rectangle(10, 10, handleSize, handleSize);
-        Rectangle bottomRight = new Rectangle(10, 10, handleSize, handleSize);
+        // 1- Create Handles
+        topLeft = new Rectangle(0, 0, handleSize, handleSize);
+        top = new Rectangle(0, 0, handleSize, handleSize);
+        topRight = new Rectangle(0, 0, handleSize, handleSize);
+        left = new Rectangle(0, 0, handleSize, handleSize);
+        right = new Rectangle(0, 0, handleSize, handleSize);
+        bottomLeft = new Rectangle(0, 0, handleSize, handleSize);
+        bottom = new Rectangle(0, 0, handleSize, handleSize);
+        bottomRight = new Rectangle(0, 0, handleSize, handleSize);
 
+        // 2- Set Handles Cursors
         topLeft.setCursor(Cursor.NW_RESIZE);
         top.setCursor(Cursor.N_RESIZE);
         topRight.setCursor(Cursor.NE_RESIZE);
@@ -58,6 +82,7 @@ public class CropBox extends AnchorPane {
         bottom.setCursor(Cursor.S_RESIZE);
         bottomRight.setCursor(Cursor.SE_RESIZE);
 
+        // 3- Paint Handles
         topLeft.setFill(handleColor);
         top.setFill(handleColor);
         topRight.setFill(handleColor);
@@ -67,115 +92,213 @@ public class CropBox extends AnchorPane {
         bottom.setFill(handleColor);
         bottomRight.setFill(handleColor);
 
-        AnchorPane.setTopAnchor(topLeft, margin);
-        AnchorPane.setTopAnchor(top, margin);
-        AnchorPane.setTopAnchor(topRight, margin);
-
-        AnchorPane.setBottomAnchor(bottomLeft, margin);
-        AnchorPane.setBottomAnchor(bottom, margin);
-        AnchorPane.setBottomAnchor(bottomRight, margin);
-
-        AnchorPane.setLeftAnchor(topLeft, margin);
-        AnchorPane.setLeftAnchor(left, margin);
-        AnchorPane.setLeftAnchor(bottomLeft, margin);
-
-        AnchorPane.setRightAnchor(topRight, margin);
-        AnchorPane.setRightAnchor(right, margin);
-        AnchorPane.setRightAnchor(bottomRight, margin);
-
-        this.widthProperty().addListener(new ChangeListener<Number>() {
+        // 4- Layout Handles in the Parent Pane
+        // See parent pane width and height change listeners
+        /**
+         * ********************************************
+         *
+         * 5- Set Resizers Based on Handle Drag Events.
+         *
+         * *********************************************
+         */
+        topLeft.setOnMouseDragged(new EventHandler<MouseEvent>() {
             @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                System.out.println("old value:" + oldValue.intValue() + " new value " + newValue.intValue());
+            public void handle(MouseEvent event) {
+                double displaceWidth = event.getSceneX() - oldX;
+                double displaceHeight = event.getSceneY() - oldY;
 
-                // FIXME you need to consider margins, and shape size
-                AnchorPane.setLeftAnchor(top, (CropBox.this.widthProperty().doubleValue() - 2 * margin - 2 * handleSize) / 2.0);
-                AnchorPane.setTopAnchor(left, CropBox.this.getHeight() / 2);
-                AnchorPane.setTopAnchor(right, CropBox.this.getHeight() / 2);
-                AnchorPane.setLeftAnchor(bottom, CropBox.this.widthProperty().doubleValue() / 2.0);
+                double oldWidth = CropBox.this.getPrefWidth();
+                double oldHeight = CropBox.this.getPrefHeight();
+                CropBox.this.setPrefWidth(CropBox.this.getPrefWidth() - displaceWidth);
+                CropBox.this.setPrefHeight(CropBox.this.getPrefHeight() - displaceHeight);
+                // fix parent pane position
+                CropBox.this.setLayoutX(CropBox.this.getLayoutX() - (CropBox.this.getPrefWidth() - oldWidth));
+                CropBox.this.setLayoutY(CropBox.this.getLayoutY() - (CropBox.this.getPrefHeight() - oldHeight));
+
+                oldX = event.getSceneX();
+                oldY = event.getSceneY();
             }
         });
 
-        this.heightProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                System.out.println("old value:" + oldValue.intValue() + " new value " + newValue.intValue());
-
-                // FIXME you need to consider margins, and shape size
-                AnchorPane.setLeftAnchor(top, (CropBox.this.widthProperty().doubleValue() - 2 * margin - 2 * handleSize) / 2.0);
-                AnchorPane.setTopAnchor(left, CropBox.this.getHeight() / 2);
-                AnchorPane.setTopAnchor(right, CropBox.this.getHeight() / 2);
-                AnchorPane.setLeftAnchor(bottom, CropBox.this.widthProperty().doubleValue() / 2.0);
-            }
-        });
         top.setOnMouseDragged(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
                 // FIXME checking size an policies must be done on its separate methods
                 //  if (getScaleY() < 0.3) return;  
-                double yy = event.getSceneY() - oldY;
+                double displace = event.getSceneY() - oldY;
 
-                double oldH = CropBox.this.getPrefHeight();
-                CropBox.this.setPrefHeight(CropBox.this.getPrefHeight() - yy);
+                double oldHeight = CropBox.this.getPrefHeight();
+                CropBox.this.setPrefHeight(CropBox.this.getPrefHeight() - displace);
                 /**
-                 * Note: code commented below has a bug! Don't use displace fix
-                 * in this way.
+                 * Note: The following code is buggy! Don't fix parent pane
+                 * position based on the mouse new position:
+                 * <p/>
+                 * {@code CropBox.this.setLayoutY(event.getSceneY() - margin - handleSize / 2);}
                  */
-                // CropBox.this.setLayoutY(event.getSceneY() - margin - handleSize / 2); 
-                CropBox.this.setLayoutY(CropBox.this.getLayoutY() - (CropBox.this.getPrefHeight() - oldH));
+                CropBox.this.setLayoutY(CropBox.this.getLayoutY() - (CropBox.this.getPrefHeight() - oldHeight));
 
                 oldY = event.getSceneY();
             }
         });
 
-        // Add all components to the root node (CropBox)
-        this.getChildren().addAll(topLeft, top, topRight, left, right, bottomLeft, bottom, bottomRight);
+        topRight.setOnMouseDragged(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                double displaceWidth = event.getSceneX() - oldX;
+                double displaceHeight = event.getSceneY() - oldY;
+
+                double oldWidth = CropBox.this.getPrefWidth();
+                double oldHeight = CropBox.this.getPrefHeight();
+                CropBox.this.setPrefWidth(CropBox.this.getPrefWidth() + displaceWidth);
+                CropBox.this.setPrefHeight(CropBox.this.getPrefHeight() - displaceHeight);
+                // fix parent pane position
+                CropBox.this.setLayoutY(CropBox.this.getLayoutY() - (CropBox.this.getPrefHeight() - oldHeight));
+
+                oldX = event.getSceneX();
+                oldY = event.getSceneY();
+            }
+        });
+
+        left.setOnMouseDragged(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                double displaceWidth = event.getSceneX() - oldX;
+
+                double oldWidth = CropBox.this.getPrefWidth();
+                CropBox.this.setPrefWidth(CropBox.this.getPrefWidth() - displaceWidth);
+                // fix parent pane position
+                CropBox.this.setLayoutX(CropBox.this.getLayoutX() - (CropBox.this.getPrefWidth() - oldWidth));
+
+                oldX = event.getSceneX();
+            }
+        });
+
+        right.setOnMouseDragged(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                double displaceWidth = event.getSceneX() - oldX;
+
+                double oldWidth = CropBox.this.getPrefWidth();
+                CropBox.this.setPrefWidth(CropBox.this.getPrefWidth() + displaceWidth);
+                // default behavior in JavaFX, no need to fix pane position
+
+                oldX = event.getSceneX();
+            }
+        });
+
+        bottomLeft.setOnMouseDragged(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                double displaceWidth = event.getSceneX() - oldX;
+                double displaceHeight = event.getSceneY() - oldY;
+
+                double oldWidth = CropBox.this.getPrefWidth();
+                double oldHeight = CropBox.this.getPrefHeight();
+                CropBox.this.setPrefWidth(CropBox.this.getPrefWidth() - displaceWidth);
+                CropBox.this.setPrefHeight(CropBox.this.getPrefHeight() + displaceHeight);
+                // fix parent pane position
+                CropBox.this.setLayoutX(CropBox.this.getLayoutX() - (CropBox.this.getPrefWidth() - oldWidth));
+
+                oldX = event.getSceneX();
+                oldY = event.getSceneY();
+            }
+        });
+
+        bottom.setOnMouseDragged(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                double displace = event.getSceneY() - oldY;
+
+                double oldHeight = CropBox.this.getPrefHeight();
+                // fix parent pane position
+                CropBox.this.setPrefHeight(CropBox.this.getPrefHeight() + displace);
+
+                oldY = event.getSceneY();
+            }
+        });
+
+        bottomRight.setOnMouseDragged(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                double displaceWidth = event.getSceneX() - oldX;
+                double displaceHeight = event.getSceneY() - oldY;
+
+                double oldWidth = CropBox.this.getPrefWidth();
+                double oldHeight = CropBox.this.getPrefHeight();
+                CropBox.this.setPrefWidth(CropBox.this.getPrefWidth() + displaceWidth);
+                CropBox.this.setPrefHeight(CropBox.this.getPrefHeight() + displaceHeight);
+                // no need to fix parent pane position
+
+                oldX = event.getSceneX();
+                oldY = event.getSceneY();
+            }
+        });
+
     }
 
-    private double headerHeight = 30;
+    private void layoutHandles() {
+        double parentWidth = this.widthProperty().doubleValue();
+        double parentHeight = this.heightProperty().doubleValue();
+
+        topLeft.setLayoutX(margin - handleSize / 2);
+        topLeft.setLayoutY(margin + headerHeight - handleSize / 2);
+
+        top.setLayoutX(parentWidth / 2 - handleSize / 2); // layout the handle at the center
+        top.setLayoutY(margin + headerHeight - handleSize / 2);
+
+        topRight.setLayoutX(parentWidth - margin - handleSize / 2);
+        topRight.setLayoutY(margin + headerHeight - handleSize / 2);
+
+        left.setLayoutX(margin - handleSize / 2);
+        left.setLayoutY(margin + headerHeight + content.getHeight() / 2 - handleSize / 2);
+
+        right.setLayoutX(parentWidth - margin - handleSize / 2);
+        right.setLayoutY(margin + headerHeight + content.getHeight() / 2 - handleSize / 2);
+
+        bottomLeft.setLayoutX(margin - handleSize / 2);
+        bottomLeft.setLayoutY(parentHeight - margin - handleSize / 2);
+
+        bottom.setLayoutX(parentWidth / 2 - handleSize / 2);
+        bottom.setLayoutY(parentHeight - margin - handleSize / 2);
+
+        bottomRight.setLayoutX(parentWidth - margin - handleSize / 2);
+        bottomRight.setLayoutY(parentHeight - margin - handleSize / 2);
+    }
+
     private void createHeader() {
         // draw header rectangle
-        Rectangle header = new Rectangle(0, 0, CropBox.this.getWidth() - 2 * margin, headerHeight);
-        header.setFill(Color.AZURE);
-        //header.setOpacity(0.5);        
-        
-        
+        header = new Rectangle(margin, margin, CropBox.this.getWidth() - 2 * margin, headerHeight);
+        header.setFill(Color.GREENYELLOW);
+        header.setOpacity(0.5);
+
         this.widthProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 header.setWidth(CropBox.this.getWidth() - 2 * margin);
             }
         });
-        
+
         // draw box title
-        Text title = new Text(margin, margin, "Test Title");
-        title.setFont(new Font("Tahoma", 14));
-        this.getChildren().addAll(header, title);
-        
-        title.toBack();
-        header.toBack();
+        // title = new Text(margin, margin, "یک متن نسبتا lkjcdafتصر برای عنوان");
+        title = new Label("یک متن نسبتا lkjcdafتصر برای عنوان");
+        title.setFont(Font.font("Tahoma", FontWeight.BOLD, 13));
+        //title.setFill(Color.BLACK);
+        title.setOpacity(0.8);
+
+        title.setTextAlignment(TextAlignment.LEFT);
+        //title.setBoundsType(TextBoundsType.VISUAL);
     }
 
     private void createContent() {
-        Rectangle content = new Rectangle(margin, headerHeight+handleSize, CropBox.this.getWidth() - 2 * margin, CropBox.this.getHeight() - 2 * margin - headerHeight);
-        content.setFill(Color.BLUE);
-        //header.setOpacity(0.5);        
-        
-        
-        this.widthProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                content.setWidth(CropBox.this.getWidth() - 2 * margin);
-            }
-        });
-        
-         this.heightProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                content.setHeight(CropBox.this.getHeight() - 2 * margin - headerHeight);
-            }
-        });
-         
+        content = new Rectangle(margin, margin + headerHeight, CropBox.this.getWidth() - 2 * margin, CropBox.this.getHeight() - 2 * margin - headerHeight);
+        // content.setFill(Color.BLUE);
+        //content.setOpacity(0.0); // fully translucent 
+//        content.setOpacity(0.2);
+        content.setFill(Color.WHITE);
+        content.setStrokeWidth(2);
+        content.setStrokeType(StrokeType.CENTERED);
+        content.setStroke(Color.BLUE);
+
         content.setOnMouseDragged(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
@@ -190,8 +313,6 @@ public class CropBox extends AnchorPane {
             }
         });
 
-         this.getChildren().addAll(content);
-         content.toBack();
     }
 
     private void createBox() {
@@ -199,14 +320,39 @@ public class CropBox extends AnchorPane {
         createHeader();
         createContent();
 
-        this.setOpacity(0.5);
+        this.getChildren().addAll(content, header, title, topLeft, top, topRight, left, right, bottomLeft, bottom, bottomRight);
 
+        //this.setOpacity(0.5);  // set opacity specifically on each child
         this.setOnMousePressed(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
                 System.out.println("on mouse pressed");
                 oldX = event.getSceneX();
                 oldY = event.getSceneY();
+            }
+        });
+
+        this.widthProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                //System.out.println("pane old width:" + oldValue.intValue() + " , pane new value " + newValue.intValue());                
+                content.setWidth(CropBox.this.getWidth() - 2 * margin);
+                layoutHandles();
+                title.setLayoutX(CropBox.this.getWidth() / 2 - title.getWidth()/ 2);
+            }
+        });
+
+        this.heightProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                //System.out.println("pane old width:" + oldValue.intValue() + " , pane new value " + newValue.intValue());                
+                /**
+                 * Content needs to be updated first, because some handle
+                 * positions depend on it.
+                 */
+                content.setHeight(CropBox.this.getHeight() - 2 * margin - headerHeight);
+                layoutHandles();
+                title.setLayoutY(margin + headerHeight / 2 /*- title.getBaselineOffset()*/); // fixed position
             }
         });
     }
@@ -239,11 +385,11 @@ public class CropBox extends AnchorPane {
     }
 
     public String getTitle() {
-        return title;
+        return titleStr;
     }
 
     public void setTitle(String title) {
-        this.title = title;
+        this.titleStr = title;
     }
 
     /**
