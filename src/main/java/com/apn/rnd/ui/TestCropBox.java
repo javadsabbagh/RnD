@@ -4,9 +4,16 @@ import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Scene;
+import javafx.scene.effect.Bloom;
+import javafx.scene.effect.BoxBlur;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.effect.Glow;
+import javafx.scene.effect.InnerShadow;
+import javafx.scene.effect.Shadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 /**
@@ -42,11 +49,26 @@ public class TestCropBox extends Application {
         box1.setPrefWidth(200);
         box1.setPrefHeight(200);
 
+        DropShadow dsEffect = new DropShadow();
+        dsEffect.setOffsetX(0);
+        dsEffect.setOffsetY(0);
+        dsEffect.setRadius(6);
+
+        box1.setEffect(dsEffect);
+
         CropBox box2 = new CropBox();
         box2.setLayoutX(40);
         box2.setLayoutY(270);
         box2.setPrefWidth(200);
         box2.setPrefHeight(200);
+        
+        box2.setOpacity(0.5);
+
+//        box2.setEffect(new BoxBlur());
+        InnerShadow is3 = new InnerShadow();
+        is3.setOffsetX(100);
+        is3.setOffsetY(100);
+        is3.setColor(Color.GRAY);
 
         CropBox box3 = new CropBox();
         box3.setLayoutX(270);
@@ -54,18 +76,24 @@ public class TestCropBox extends Application {
         box3.setPrefWidth(200);
         box3.setPrefHeight(200);
 
+//        box3.setEffect(new Glow());
+        Shadow s2 = new Shadow();
+        s2.setColor(Color.YELLOW);
+        box3.setEffect(s2);
+
         CropBox box4 = new CropBox();
         box4.setLayoutX(33);
         box4.setLayoutY(28);
         box4.setPrefWidth(200);
         box4.setPrefHeight(200);
 
+//        box4.setEffect(new Bloom(0.10));
         ImageView imageView = new ImageView("file:///C:/Documents%20and%20Settings/sabbagh.BEHINCO/Desktop/Doc/005.bmp");
         imageView.setLayoutX(0);
         imageView.setLayoutY(0);
         imageView.setFitWidth(650);
         imageView.setFitHeight(650);
-                
+
         root = new Pane();
         root.setPrefWidth(650);
         root.setPrefHeight(650);
@@ -76,14 +104,14 @@ public class TestCropBox extends Application {
                 imageView.setFitWidth(newValue.doubleValue());
             }
         });
-        
+
         root.heightProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 imageView.setFitHeight(newValue.doubleValue());
             }
         });
-        
+
         root.getChildren().addAll(imageView, box1, box2, box3, box4);
     }
 
