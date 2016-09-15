@@ -292,6 +292,25 @@ public class CropBox extends Pane {
         content.setLayoutY(margin + headerHeight);
         content.setPrefSize(CropBox.this.getWidth() - 2 * margin, CropBox.this.getHeight() - 2 * margin - headerHeight);
 
+        /**
+         * Set the content border.
+         * <p>
+         * Note: we cannot use {@code Rectangle} node as a border, because
+         * setting transparency on it has effect on both its strike and
+         * background. In other word we cannot set {@code Rectangle} stroke and
+         * background transpancy separately.
+         */
+        content.setStyle(
+                new StringBuilder()
+                //.append("-fx-padding: 10;") // padding between content children, has no effect if content does not have any children.
+                .append("-fx-border-style: solid inside;") // line style
+                .append("-fx-border-width: 2;")
+                //.append("-fx-border-insets: 5;")
+                //.append("-fx-border-radius: 5;")
+                .append("-fx-border-color: blue;") // line color
+                .toString()
+        );
+
         content.setOnMouseDragged(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
@@ -328,7 +347,7 @@ public class CropBox extends Pane {
                 CropBox.this.toFront();
             }
         });
-        
+
         this.setOnMouseReleased(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
@@ -342,7 +361,7 @@ public class CropBox extends Pane {
                 content.setPrefWidth(CropBox.this.getWidth() - 2 * margin);
                 layoutHandles();
                 //title.setLayoutX(CropBox.this.getWidth() / 2 - title.getWidth() / 2);
-                double titleWidth = JavafxUtil.findTextWidth(title.getText(), title.getFont());
+                double titleWidth = JavafxUtil.findTextSize(title.getText(), title.getFont()).getWidth();
                 title.setLayoutX(CropBox.this.getWidth() / 2 - titleWidth / 2);
             }
         });
@@ -356,7 +375,8 @@ public class CropBox extends Pane {
                  */
                 content.setPrefHeight(CropBox.this.getHeight() - 2 * margin - headerHeight);
                 layoutHandles();
-                title.setLayoutY(margin + headerHeight / 2 - title.getBaselineOffset() / 2); // fixed position
+                double titleHeight = JavafxUtil.findTextSize(title.getText(), title.getFont()).getHeight();
+                title.setLayoutY(margin + headerHeight / 2 - titleHeight / 2);
             }
         });
     }
