@@ -6,6 +6,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
+import javafx.scene.input.MouseDragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -290,25 +291,13 @@ public class CropBox extends Pane {
         content.setLayoutX(margin);
         content.setLayoutY(margin + headerHeight);
         content.setPrefSize(CropBox.this.getWidth() - 2 * margin, CropBox.this.getHeight() - 2 * margin - headerHeight);
-//        content2.setFill(Color.WHITE);
-//        Rectangle border = new Rectangle(content2.getWidth() - 2, content2.getHeight() - 2);
-//        border.setFill(Color.BLUE);
-//        content2.getChildren().addAll(border);
-
-        Rectangle border = new Rectangle(0, 0, content.getPrefWidth() - 2, content.getPrefHeight() - 2);
-        // border.setFill(Color.BLUE);
-        border.setOpacity(0.5); // fully transparent 
-        //border.setOpacity(1.0); // fully opaque
-        border.setFill(Color.WHITE);
-        border.setStrokeWidth(2);
-        border.setStrokeType(StrokeType.CENTERED);
-        border.setStroke(Color.BLUE);
 
         content.setOnMouseDragged(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
                 System.out.println("Mouse dragged ... " + " screenX: " + event.getScreenX() + " sceneX: " + event.getSceneX() + " X: " + event.getX());
 
+                content.setCursor(Cursor.MOVE);
                 CropBox.this.setLayoutX(getLayoutX() + (event.getSceneX() - oldX));
                 CropBox.this.setLayoutY(getLayoutY() + (event.getSceneY() - oldY));
 
@@ -316,22 +305,6 @@ public class CropBox extends Pane {
                 oldY = event.getSceneY();
             }
         });
-        
-        content.widthProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                border.setWidth(content.getPrefWidth() - 2);                
-            }
-        });
-        
-        content.heightProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                border.setHeight(content.getPrefHeight() - 2);
-            }
-        });
-        
-        content.getChildren().addAll(border);
     }
 
     private void createBox() {
@@ -342,6 +315,9 @@ public class CropBox extends Pane {
         this.getChildren().addAll(content, header, title, topLeft, top, topRight, left, right, bottomLeft, bottom, bottomRight);
 
         //this.setOpacity(0.5);  // set opacity specifically on each child
+        /**
+         * Mark mouse position for drag, resize, move, etc.
+         */
         this.setOnMousePressed(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
@@ -350,6 +326,13 @@ public class CropBox extends Pane {
                 oldY = event.getSceneY();
 
                 CropBox.this.toFront();
+            }
+        });
+        
+        this.setOnMouseReleased(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                content.setCursor(Cursor.DEFAULT);
             }
         });
 
