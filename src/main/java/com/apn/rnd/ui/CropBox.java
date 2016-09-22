@@ -6,6 +6,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.input.MouseDragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
@@ -28,6 +29,7 @@ public class CropBox extends Pane {
     private State state;
     private double margin = 0.0;
     private double angle;
+    private boolean selected;
 
     // Handles
     private static final int handleSize = 6;
@@ -281,7 +283,7 @@ public class CropBox extends Pane {
         // draw box title
         // title = new Text(margin, margin, "یک متن نسبتا lkjcdafتصر برای عنوان");
         title = new Label("متن المتون");
-        title.setFont(Font.font("b nazanin", FontWeight.NORMAL, 18));
+        title.setFont(Font.font("b nazanin", FontWeight.NORMAL, 25));
         //title.setFill(Color.BLACK);
         //title.setOpacity(1.0);      
     }
@@ -376,7 +378,7 @@ public class CropBox extends Pane {
                 content.setPrefHeight(CropBox.this.getHeight() - 2 * margin - headerHeight);
                 layoutHandles();
                 double titleHeight = JavafxUtil.findTextSize(title.getText(), title.getFont()).getHeight();
-                title.setLayoutY(margin + headerHeight / 2 - titleHeight / 2);
+                title.setLayoutY(margin + headerHeight / 2 - titleHeight / 2 - title.getBaselineOffset() / 2);
             }
         });
     }
@@ -414,6 +416,42 @@ public class CropBox extends Pane {
 
     public void setTitle(String title) {
         this.titleStr = title;
+    }
+
+    public boolean isSelected() {
+        return selected;
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
+
+        if (selected) {  
+            // set shadow effect
+            DropShadow dsEffect = new DropShadow();
+            dsEffect.setOffsetX(0);
+            dsEffect.setOffsetY(0);
+            dsEffect.setRadius(6);
+
+            //this.setEffect(dsEffect);
+            //header.setEffect(null);
+            title.setEffect(dsEffect);
+            topLeft.setEffect(dsEffect);
+            top.setEffect(dsEffect);
+            topRight.setEffect(dsEffect);
+            
+            left.setEffect(dsEffect);
+            right.setEffect(dsEffect);
+            
+            bottomLeft.setEffect(dsEffect);
+            bottom.setEffect(dsEffect);
+            bottomRight.setEffect(dsEffect);
+            
+            content.setEffect(dsEffect);
+            
+        } else {
+            this.setOpacity(0.5);
+            title.setOpacity(1.0);
+        }
     }
 
     /**
