@@ -1,11 +1,10 @@
 package com.apn.rnd.ui;
 
 import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 /**
@@ -13,25 +12,33 @@ import javafx.stage.Stage;
  * @author Javad Sabbagh
  */
 public class CheckBoardTest extends Application {
-    
+       
     @Override
     public void start(Stage primaryStage) {
-        Button btn = new Button();
-        btn.setText("Say 'Hello World'");
-        btn.setOnAction(new EventHandler<ActionEvent>() {
-            
+        VBox root = new VBox();
+        CheckBoard board = new CheckBoard();  // create all child controls
+        root.getChildren().add(board);        
+
+        /**
+         * Canvas control does not automatically resize with its container, why?
+         * So we need to resize it manually.
+         */
+        root.widthProperty().addListener(new ChangeListener<Number>() {
             @Override
-            public void handle(ActionEvent event) {
-                System.out.println("Hello World!");
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                board.setWidth(root.getWidth());
             }
         });
         
-        StackPane root = new StackPane();
-        root.getChildren().add(btn);
-        
+        root.heightProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                board.setHeight(root.getHeight());
+            }
+        });
         Scene scene = new Scene(root, 300, 250);
-        
-        primaryStage.setTitle("Hello World!");
+
+        primaryStage.setTitle("CheckBoard Control Test");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
@@ -42,5 +49,5 @@ public class CheckBoardTest extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-    
+
 }
